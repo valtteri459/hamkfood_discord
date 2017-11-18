@@ -1,12 +1,13 @@
 const discord = require("discord.js");
 const http = require("https");
-const schedule = require("node-schedule");
+const CronJob = require("cron").CronJob;
 console.log(schedule);
 
 const client = new discord.Client();
 const config = require("./config");
 var postChannels = config.predetermined;
 
+var initialized = false;
 client.on('ready', () => {
     console.log('I am ready!');
     client.generateInvite(["SEND_MESSAGES", "MENTION_EVERYONE", "READ_MESSAGES", "CHANGE_NICKNAME", "ATTACH_FILES"]).then(link => {
@@ -72,8 +73,12 @@ client.on('ready', () => {
             });
         });
     }
-    getFoods();
-    schedule.scheduleJob("6 30 * * *", ()=>{getFoods()});
+    if(!initialized){
+        var repeatJob = new CronJob("0 30 6 * * *", getFoods, null, true, "Europe/Helsinki");
+        initialized = true;
+    }
+    console.log(repeatJob);
+    
 });
 
 client.on('message', message => {
